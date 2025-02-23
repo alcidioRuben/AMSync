@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AMSync</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="forms.css">
+    <!-- Firebase App (a base) -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
+
+    <!-- Adicionar produtos Firebase que você quer usar -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-storage-compat.js"></script>
+
+    <!-- Configuração do Firebase -->
+    <script src="firebase-config.js"></script>
+    
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="#">84111 AMSync</a>
+            <a class="navbar-brand"  href="#" id="saldo-value" class="loading-placeholder"> A consultar...</a>
+            <!-- O userInfo e o botão de logout serão inseridos aqui via JavaScript -->
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="stats-container animate__animated animate__fadeIn">
+            <div class="stat-card">
+                <div class="stat-value loading">
+                    <div class="loading-placeholder">
+                        <div class="spinner-border spinner-border-sm text-vodacom" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <span>Carregando...</span>
+                    </div>
+                </div>
+                <div class="stat-label cor-verde">Sua Comissão da Semana</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value loading">
+                    <div class="loading-placeholder">
+                        <div class="spinner-border spinner-border-sm text-vodacom" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-label">Meta Atingida</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card animate__animated animate__fadeIn">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quem Está no Topo?</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="vendasChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Registro de Transações -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card animate__animated animate__fadeIn" style="animation-delay: 0.2s">
+                    <div class="card-header">
+                        <h5 class="mb-0">Confirmar Pagamento</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="transacaoForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Codigo do Recibo</label>
+                                    <input type="text" name="numeroCliente" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Megas Vendidos</label>
+                                    <input type="number" name="megasVendidos" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Valor pago(MT)</label>
+                                    <input type="number" name="valor" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Data</label>
+                                    <input type="date" name="data" class="form-control" required id="dataInput">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-vodacom">Verificar Pagamento</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nova Tabela de Comissões Semanais -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card comissao-card animate__animated animate__fadeIn" style="animation-delay: 0.4s">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <h5 class="mb-0">Comissões para Pagamento</h5>
+                            <span class="badge-proximo-pagamento ms-3">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                Próximo Pagamento Sexta-feira
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive mobile-scroll">
+                            <table class="comissao-table">
+                                <thead>
+                                    <tr>
+                                        <th>Revendedor</th>
+                                        <th>Total Megas</th>
+                                        <th>Total Vendas</th>
+                                        <th>Comissão Base</th>
+                                        <th>Bônus</th>
+                                        <th>Total a Receber</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dados serão inseridos via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Substituir as tabelas por esta nova estrutura -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card animate__animated animate__fadeIn">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Histórico</h5>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-vodacom" data-filter="all">Todas</button>
+                            <button class="btn btn-outline-vodacom active" data-filter="today">Hoje</button>
+                            <button class="btn btn-outline-vodacom" data-filter="week">Esta Semana</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="vendas-container" class="vendas-grid">
+                            <!-- Cards serão inseridos via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adicionar após a última div.row do container -->
+    <div class="contact-section animate__animated animate__fadeIn" style="animation-delay: 0.5s">
+        <div class="contact-container">
+            <div class="contact-header">
+                <h4 class="section-title">Informações de Contato</h4>
+                <div class="divider"></div>
+            </div>
+            
+            <div class="contact-grid">
+                <div class="contact-card developer">
+                    <div class="card-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Desenvolvido por</h6>
+                        <p>Alcidio Macuacua</p>
+                    </div>
+                </div>
+
+                <div class="contact-card whatsapp">
+                    <div class="card-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>WhatsApp Pessoal</h6>
+                        <a href="https://wa.me/258841006962" target="_blank" class="whatsapp-personal">
+                            84 100 6962  <p>Alcy</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="contact-card groups">
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Grupos</h6>
+                        <div class="groups-links">
+                            <a href="https://chat.whatsapp.com/IU6ElJzUdMr1SnQHx1aWEA" target="_blank" class="group-link">
+                                <i class="fab fa-whatsapp"></i> AMSync Oficial
+                            </a>
+                            <a href="https://chat.whatsapp.com/DZpOj2JRdfHJG5zIZO0VUw" target="_blank" class="group-link">
+                                <i class="fab fa-whatsapp"></i> 84111 AMSync Vendas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adicionar overlay de loading -->
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Adicionar antes do fechamento do body -->
+    <button id="btnVoltarTopo" class="btn-voltar-topo">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+  <!-- Modal de Alerta -->
+<div id="modal-saldo" class="modal hidden">
+    <div class="modal-content">
+        <h2>Saldo Insuficiente</h2>
+        <p>Não é possível completar a transação, pois o saldo é insuficiente.</p>
+        <button id="modal-ok1" class="modal-button">Entendido</button>
+    </div>
+</div>
+
+<div id="modal-numero" class="modal hidden">
+    <div class="modal-content">
+        <h2>Pagamento nao Vericado!</h2>
+        <p>Não é possível completar a transação, pois o pagamento não foi encontrado.</p>
+        <button id="modal-ok2" class="modal-button">Entendido</button>
+    </div>
+</div>
+
+<div id="modal-valor" class="modal hidden">
+    <div class="modal-content">
+        <h2>O valor da transação não corresponde ao valor do pagamento</h2>
+        <p>Não é possível completar a transação, pois o valor não corresponde ao valor do pagamento.</p>
+        <button id="modal-ok3" class="modal-button">Entendido</button>
+    </div>
+</div>
+
+</body> 
+    <script src="forms.js"></script>
+</body>
+</html>
